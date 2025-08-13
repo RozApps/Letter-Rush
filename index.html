@@ -4,31 +4,102 @@
     <base target="_top">
     <title>Letter Rush</title>
     <style>
-      body { font-family: sans-serif; padding: 20px; text-align: center; background: #f9fafb; }
-      h1 { font-size: 24px; margin-bottom: 10px; }
-      select, button { padding: 8px 14px; margin: 5px; font-size: 16px; }
-      .grid { display: grid; grid-template-columns: repeat(7, 50px); gap: 8px; justify-content: center; margin: 20px auto; }
-      .letter { padding: 10px; border: 2px solid #ccc; border-radius: 8px; font-size: 18px; font-weight: bold; background: white; cursor: pointer; }
-      .letter.used { background: #e2e8f0; color: #999; border-color: #ddd; text-decoration: line-through; cursor: not-allowed; }
-      #timer { font-size: 18px; margin-top: 10px; font-weight: bold; }
+      :root {
+        --letter-size: 18px;
+      }
+
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        text-align: center;
+        background: #f9fafb;
+        color: #000;
+      }
+
+      h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+      }
+
+      select, button, input[type="range"] {
+        padding: 8px 14px;
+        margin: 5px;
+        font-size: 16px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(7, 50px);
+        gap: 8px;
+        justify-content: center;
+        margin: 20px auto;
+      }
+
+      .letter {
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        font-size: var(--letter-size);
+        font-weight: bold;
+        background: white;
+        cursor: pointer;
+      }
+
+      .letter.used {
+        background: #e2e8f0;
+        color: #999;
+        border-color: #ddd;
+        text-decoration: line-through;
+        cursor: not-allowed;
+      }
+
+      .high-contrast {
+        background: #000;
+        color: #fff;
+      }
+
+      .high-contrast .letter {
+        background: #fff;
+        color: #000;
+        border-color: #fff;
+      }
+
+      #timer {
+        font-size: 18px;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      #controls {
+        margin-bottom: 15px;
+      }
     </style>
   </head>
   <body>
     <h1>Letter Rush</h1>
-    <div>
+
+    <div id="controls">
       <select id="topicSelect">
         <option value="">Choose a topic</option>
       </select>
+
       <select id="timerSelect">
         <option value="10000">10 seconds</option>
         <option value="15000" selected>15 seconds</option>
         <option value="20000">20 seconds</option>
         <option value="30000">30 seconds</option>
       </select>
+
       <button onclick="randomTopic()">🎲 Random Topic</button>
       <button onclick="startRound()">▶️ Start</button>
       <button onclick="resetLetters()">🔄 Reset</button>
+      <button onclick="toggleContrast()">🌓 Toggle Contrast</button>
     </div>
+
+    <div>
+      Font Size: <input type="range" min="16" max="36" value="18" onchange="changeFontSize(this.value)">
+    </div>
+
     <div id="topicDisplay" style="margin-top: 10px; font-weight: bold;"></div>
     <div id="timer">Timer: 15.0s</div>
     <div class="grid" id="letterGrid"></div>
@@ -41,10 +112,11 @@
         'Superheroes','Foods','Desserts','Body parts','School subjects','Toys',
         'Games','Stores','Restaurants','Holidays','Tools','Weather','Emotions'
       ];
+
       let used = new Set();
       let running = false;
       let timer = null;
-      let remaining = 15000; // default
+      let remaining = 15000;
 
       const letterGrid = document.getElementById('letterGrid');
       const timerEl = document.getElementById('timer');
@@ -52,6 +124,7 @@
       const topicSelect = document.getElementById('topicSelect');
       const timerSelect = document.getElementById('timerSelect');
 
+      // Populate topics
       TOPICS.forEach(t => {
         const opt = document.createElement('option');
         opt.value = t;
@@ -119,6 +192,14 @@
             timerEl.textContent = '⏰ Time\'s up!';
           }
         }, 100);
+      }
+
+      function toggleContrast() {
+        document.body.classList.toggle('high-contrast');
+      }
+
+      function changeFontSize(size) {
+        document.documentElement.style.setProperty('--letter-size', size + 'px');
       }
 
       buildGrid();
