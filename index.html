@@ -4,10 +4,6 @@
     <base target="_top">
     <title>Letter Rush</title>
     <style>
-      :root {
-        --menu-size: 16px;
-      }
-
       body {
         font-family: sans-serif;
         padding: 20px;
@@ -20,29 +16,54 @@
         margin-bottom: 20px;
       }
 
-      select, button {
+      .controls {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      button, select {
         padding: 10px 16px;
-        margin: 8px;
-        font-size: var(--menu-size);
+        font-size: 18px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      #topicDisplay, #timer {
+        font-weight: bold;
+        font-size: 20px;
+        margin-top: 10px;
       }
 
       .grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-        gap: 12px;
-        justify-content: center;
-        max-width: 420px;
+        grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+        gap: 10px;
+        justify-items: center;
         margin: 20px auto;
+        max-width: 400px;
       }
 
       .letter {
-        padding: 14px;
+        padding: 10px;
         border: 2px solid #ccc;
         border-radius: 8px;
-        font-size: var(--letter-size, 24px);
         font-weight: bold;
         background: white;
         cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .letter.used {
@@ -53,80 +74,79 @@
         cursor: not-allowed;
       }
 
-      #timer {
-        font-size: 20px;
+      .slider-container {
         margin-top: 10px;
-        font-weight: bold;
       }
 
-      .button-row {
+      .accessibility-buttons {
         display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
         gap: 10px;
-        margin-top: 10px;
+        justify-content: center;
+        margin-bottom: 10px;
       }
-
     </style>
   </head>
   <body>
     <h1>Letter Rush</h1>
 
-    <div class="button-row">
-      <select id="topicSelect">
-        <option value="">Choose a topic</option>
-      </select>
+    <div class="controls">
+      <div class="accessibility-buttons">
+        <button onclick="toggleContrast()">Toggle Contrast</button>
+        <button onclick="toggleMenuSize()">Menu Text Size</button>
+      </div>
 
-      <select id="timerSelect">
-        <option value="10000">10 seconds</option>
-        <option value="15000" selected>15 seconds</option>
-        <option value="20000">20 seconds</option>
-        <option value="30000">30 seconds</option>
-      </select>
+      <div class="button-row">
+        <select id="topicSelect">
+          <option value="">Choose a topic</option>
+        </select>
+        <select id="timerSelect">
+          <option value="10000">10 seconds</option>
+          <option value="15000" selected>15 seconds</option>
+          <option value="20000">20 seconds</option>
+          <option value="30000">30 seconds</option>
+        </select>
+      </div>
 
-      <button onclick="randomTopic()">🎲 Random Topic</button>
-      <button onclick="toggleMenuSize()" id="menuSizeButton">Menu Text Size: 16px</button>
+      <div class="button-row">
+        <button onclick="randomTopic()">🎲 Random Topic</button>
+      </div>
+      <div class="button-row">
+        <button onclick="startRound()">▶️ Start</button>
+        <button onclick="resetLetters()">🔄 Reset</button>
+      </div>
     </div>
 
-    <div class="button-row">
-      <button onclick="startRound()">▶️ Start</button>
-      <button onclick="resetLetters()">🔄 Reset</button>
-    </div>
-
-    <div id="topicDisplay" style="margin-top: 10px; font-weight: bold;"></div>
+    <div id="topicDisplay"></div>
     <div id="timer">Timer: 15.0s</div>
+
     <div class="grid" id="letterGrid"></div>
+
+    <div class="slider-container">
+      <label for="letterSizeSlider">Letter Size:</label>
+      <input type="range" id="letterSizeSlider" min="16" max="64" value="24" oninput="updateLetterSize(this.value)">
+    </div>
 
     <script>
       const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
       const TOPICS = [
-        'Animals','Countries','Fruits','Cities','Colors','Sports','Vehicles',
-        'Occupations','Things in a kitchen','Movies','TV Shows','Cartoons',
-        'Superheroes','Foods','Desserts','Body parts','School subjects','Toys',
-        'Games','Stores','Restaurants','Holidays','Tools','Weather','Emotions'
+        'Animals', 'Countries', 'Fruits', 'Cities', 'Colors', 'Sports', 'Vehicles',
+        'Occupations', 'Things in a kitchen', 'Movies', 'TV Shows', 'Cartoons',
+        'Superheroes', 'Foods', 'Desserts', 'Body parts', 'School subjects', 'Toys',
+        'Games', 'Stores', 'Restaurants', 'Holidays', 'Tools', 'Weather', 'Emotions'
       ];
 
       let used = new Set();
       let running = false;
       let timer = null;
       let remaining = 15000;
+      let menuSize = 18;
+      let isHighContrast = false;
 
       const letterGrid = document.getElementById('letterGrid');
       const timerEl = document.getElementById('timer');
       const topicDisplay = document.getElementById('topicDisplay');
       const topicSelect = document.getElementById('topicSelect');
       const timerSelect = document.getElementById('timerSelect');
-      const menuSizeButton = document.getElementById('menuSizeButton');
-
-      const menuSizes = ['16px', '20px', '24px'];
-      let menuSizeStep = 0;
-
-      function toggleMenuSize() {
-        menuSizeStep = (menuSizeStep + 1) % menuSizes.length;
-        const newSize = menuSizes[menuSizeStep];
-        document.documentElement.style.setProperty('--menu-size', newSize);
-        menuSizeButton.textContent = `Menu Text Size: ${newSize}`;
-      }
 
       TOPICS.forEach(t => {
         const opt = document.createElement('option');
@@ -137,10 +157,12 @@
 
       function buildGrid() {
         letterGrid.innerHTML = '';
+        const fontSize = document.getElementById('letterSizeSlider').value + 'px';
         LETTERS.forEach(letter => {
           const div = document.createElement('div');
           div.textContent = letter;
           div.className = 'letter';
+          div.style.fontSize = fontSize;
           div.onclick = () => onLetterClick(letter, div);
           letterGrid.appendChild(div);
         });
@@ -159,8 +181,8 @@
         clearInterval(timer);
         remaining = parseInt(timerSelect.value);
         timerEl.textContent = 'Timer: ' + (remaining / 1000).toFixed(1) + 's';
-        buildGrid();
         topicDisplay.textContent = '';
+        buildGrid();
       }
 
       function randomTopic() {
@@ -195,6 +217,31 @@
             timerEl.textContent = '⏰ Time\'s up!';
           }
         }, 100);
+      }
+
+      function updateLetterSize(size) {
+        document.querySelectorAll('.letter').forEach(div => {
+          div.style.fontSize = size + 'px';
+        });
+      }
+
+      function toggleMenuSize() {
+        menuSize += 2;
+        if (menuSize > 30) menuSize = 18; // reset cycle
+        document.querySelectorAll('button, select, option, label').forEach(el => {
+          el.style.fontSize = menuSize + 'px';
+        });
+      }
+
+      function toggleContrast() {
+        isHighContrast = !isHighContrast;
+        document.body.style.background = isHighContrast ? '#000' : '#f9fafb';
+        document.body.style.color = isHighContrast ? '#fff' : '#000';
+        document.querySelectorAll('.letter').forEach(el => {
+          el.style.background = isHighContrast ? '#fff' : '#fff';
+          el.style.color = isHighContrast ? '#000' : '#000';
+          el.style.borderColor = isHighContrast ? '#fff' : '#ccc';
+        });
       }
 
       buildGrid();
