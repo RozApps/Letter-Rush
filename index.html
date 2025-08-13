@@ -6,13 +6,22 @@
     <style>
       :root {
         --menu-size: 16px;
+        --bg-color: #f9fafb;
+        --letter-bg: white;
+        --letter-border: #ccc;
+        --text-color: black;
+        --letter-text-color: black;
+        --used-bg: #e2e8f0;
+        --used-color: #999;
+        --used-border: #ddd;
       }
 
       body {
         font-family: sans-serif;
         padding: 20px;
         text-align: center;
-        background: #f9fafb;
+        background: var(--bg-color);
+        color: var(--text-color);
       }
 
       h1 {
@@ -37,18 +46,19 @@
 
       .letter {
         padding: 14px;
-        border: 2px solid #ccc;
+        border: 2px solid var(--letter-border);
         border-radius: 8px;
         font-size: var(--letter-size, 24px);
         font-weight: bold;
-        background: white;
+        background: var(--letter-bg);
+        color: var(--letter-text-color);
         cursor: pointer;
       }
 
       .letter.used {
-        background: #e2e8f0;
-        color: #999;
-        border-color: #ddd;
+        background: var(--used-bg);
+        color: var(--used-color);
+        border-color: var(--used-border);
         text-decoration: line-through;
         cursor: not-allowed;
       }
@@ -76,6 +86,7 @@
       <select id="topicSelect">
         <option value="">Choose a topic</option>
       </select>
+      <button onclick="randomTopic()">🎲 Random Topic</button>
 
       <select id="timerSelect">
         <option value="10000">10 seconds</option>
@@ -84,8 +95,9 @@
         <option value="30000">30 seconds</option>
       </select>
 
-      <button onclick="randomTopic()">🎲 Random Topic</button>
       <button onclick="toggleMenuSize()" id="menuSizeButton">Menu Text Size: 16px</button>
+      <button onclick="toggleLetterSize()" id="letterSizeButton">Letter Size: 24px</button>
+      <button onclick="toggleContrast()" id="contrastButton">🔆 Normal Contrast</button>
     </div>
 
     <div class="button-row">
@@ -117,15 +129,52 @@
       const topicSelect = document.getElementById('topicSelect');
       const timerSelect = document.getElementById('timerSelect');
       const menuSizeButton = document.getElementById('menuSizeButton');
+      const letterSizeButton = document.getElementById('letterSizeButton');
+      const contrastButton = document.getElementById('contrastButton');
 
       const menuSizes = ['16px', '20px', '24px'];
       let menuSizeStep = 0;
+      const letterSizes = ['18px', '24px', '32px', '40px'];
+      let letterSizeStep = 1; // Start at 24px
+      let highContrast = false;
 
       function toggleMenuSize() {
         menuSizeStep = (menuSizeStep + 1) % menuSizes.length;
         const newSize = menuSizes[menuSizeStep];
         document.documentElement.style.setProperty('--menu-size', newSize);
         menuSizeButton.textContent = `Menu Text Size: ${newSize}`;
+      }
+
+      function toggleLetterSize() {
+        letterSizeStep = (letterSizeStep + 1) % letterSizes.length;
+        const newSize = letterSizes[letterSizeStep];
+        document.documentElement.style.setProperty('--letter-size', newSize);
+        letterSizeButton.textContent = `Letter Size: ${newSize}`;
+      }
+
+      function toggleContrast() {
+        highContrast = !highContrast;
+        if (highContrast) {
+          document.documentElement.style.setProperty('--bg-color', '#000000');
+          document.documentElement.style.setProperty('--letter-bg', '#ffffff');
+          document.documentElement.style.setProperty('--letter-border', '#000000');
+          document.documentElement.style.setProperty('--text-color', '#ffffff');
+          document.documentElement.style.setProperty('--letter-text-color', '#000000');
+          document.documentElement.style.setProperty('--used-bg', '#333333');
+          document.documentElement.style.setProperty('--used-color', '#cccccc');
+          document.documentElement.style.setProperty('--used-border', '#666666');
+          contrastButton.textContent = '🌙 High Contrast';
+        } else {
+          document.documentElement.style.setProperty('--bg-color', '#f9fafb');
+          document.documentElement.style.setProperty('--letter-bg', 'white');
+          document.documentElement.style.setProperty('--letter-border', '#ccc');
+          document.documentElement.style.setProperty('--text-color', 'black');
+          document.documentElement.style.setProperty('--letter-text-color', 'black');
+          document.documentElement.style.setProperty('--used-bg', '#e2e8f0');
+          document.documentElement.style.setProperty('--used-color', '#999');
+          document.documentElement.style.setProperty('--used-border', '#ddd');
+          contrastButton.textContent = '🔆 Normal Contrast';
+        }
       }
 
       TOPICS.forEach(t => {
