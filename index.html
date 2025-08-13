@@ -3,9 +3,12 @@
   <head>
     <base target="_top">
     <title>Letter Rush</title>
+    <!-- Import Gallaudet font for fingerspelling -->
+    <link href="https://fonts.googleapis.com/css2?family=Gallaudet&display=swap" rel="stylesheet">
     <style>
       :root {
         --menu-size: 16px;
+        --letter-font: 'Arial', sans-serif;
         --bg-color: #f9fafb;
         --letter-bg: white;
         --letter-border: #ccc;
@@ -50,6 +53,7 @@
         border-radius: 8px;
         font-size: var(--letter-size, 24px);
         font-weight: bold;
+        font-family: var(--letter-font);
         background: var(--letter-bg);
         color: var(--letter-text-color);
         cursor: pointer;
@@ -97,6 +101,7 @@
 
       <button onclick="toggleMenuSize()" id="menuSizeButton">Menu Text Size: 16px</button>
       <button onclick="toggleLetterSize()" id="letterSizeButton">Letter Size: 24px</button>
+      <button onclick="toggleLetterFont()" id="letterFontButton">Font: Text</button>
       <button onclick="toggleContrast()" id="contrastButton">🔆 Normal Contrast</button>
     </div>
 
@@ -130,12 +135,18 @@
       const timerSelect = document.getElementById('timerSelect');
       const menuSizeButton = document.getElementById('menuSizeButton');
       const letterSizeButton = document.getElementById('letterSizeButton');
+      const letterFontButton = document.getElementById('letterFontButton');
       const contrastButton = document.getElementById('contrastButton');
 
       const menuSizes = ['16px', '20px', '24px'];
       let menuSizeStep = 0;
       const letterSizes = ['18px', '24px', '32px', '40px'];
       let letterSizeStep = 1; // Start at 24px
+      const letterFonts = [
+        { name: 'Text', family: "'Arial', sans-serif" },
+        { name: 'Fingerspelling', family: "'Gallaudet', 'Arial', sans-serif" }
+      ];
+      let letterFontStep = 0;
       let highContrast = false;
 
       function toggleMenuSize() {
@@ -150,6 +161,13 @@
         const newSize = letterSizes[letterSizeStep];
         document.documentElement.style.setProperty('--letter-size', newSize);
         letterSizeButton.textContent = `Letter Size: ${newSize}`;
+      }
+
+      function toggleLetterFont() {
+        letterFontStep = (letterFontStep + 1) % letterFonts.length;
+        const newFont = letterFonts[letterFontStep];
+        document.documentElement.style.setProperty('--letter-font', newFont.family);
+        letterFontButton.textContent = `Font: ${newFont.name}`;
       }
 
       function toggleContrast() {
