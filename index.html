@@ -4,46 +4,47 @@
     <base target="_top">
     <title>Letter Rush</title>
     <style>
+      :root {
+        --menu-size: 16px;
+      }
+
       body {
         font-family: sans-serif;
         padding: 20px;
         text-align: center;
         background: #f9fafb;
-        transition: background-color 0.3s, color 0.3s;
       }
+
       h1 {
-        font-size: 48px;
+        font-size: 36px;
         margin-bottom: 20px;
       }
+
       select, button {
-        padding: 12px 18px;
+        padding: 10px 16px;
         margin: 8px;
-        font-size: 18px;
+        font-size: var(--menu-size);
       }
-      .button-row {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin: 10px 0;
-      }
+
       .grid {
         display: grid;
-        grid-template-columns: repeat(8, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
         gap: 12px;
         justify-content: center;
+        max-width: 420px;
         margin: 20px auto;
-        max-width: 480px;
       }
+
       .letter {
         padding: 14px;
         border: 2px solid #ccc;
-        border-radius: 10px;
-        font-size: var(--letter-font-size, 24px);
+        border-radius: 8px;
+        font-size: var(--letter-size, 24px);
         font-weight: bold;
         background: white;
         cursor: pointer;
       }
+
       .letter.used {
         background: #e2e8f0;
         color: #999;
@@ -51,15 +52,21 @@
         text-decoration: line-through;
         cursor: not-allowed;
       }
+
       #timer {
         font-size: 20px;
         margin-top: 10px;
         font-weight: bold;
       }
-      .high-contrast {
-        background-color: black;
-        color: yellow;
+
+      .button-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
       }
+
     </style>
   </head>
   <body>
@@ -69,25 +76,20 @@
       <select id="topicSelect">
         <option value="">Choose a topic</option>
       </select>
+
       <select id="timerSelect">
         <option value="10000">10 seconds</option>
         <option value="15000" selected>15 seconds</option>
         <option value="20000">20 seconds</option>
         <option value="30000">30 seconds</option>
       </select>
-    </div>
 
-    <div class="button-row">
       <button onclick="randomTopic()">🎲 Random Topic</button>
-      <button onclick="toggleContrast()">🌓 Toggle Contrast</button>
-      <button onclick="increaseMenuSize()">🔠 Bigger Menu</button>
-      <button onclick="increaseLetterSize()">🔡 Bigger Letters</button>
+      <button onclick="toggleMenuSize()" id="menuSizeButton">Menu Text Size: 16px</button>
     </div>
 
     <div class="button-row">
       <button onclick="startRound()">▶️ Start</button>
-    </div>
-    <div class="button-row">
       <button onclick="resetLetters()">🔄 Reset</button>
     </div>
 
@@ -103,18 +105,28 @@
         'Superheroes','Foods','Desserts','Body parts','School subjects','Toys',
         'Games','Stores','Restaurants','Holidays','Tools','Weather','Emotions'
       ];
+
       let used = new Set();
       let running = false;
       let timer = null;
       let remaining = 15000;
-      let menuScale = 1;
-      let letterScale = 1;
 
       const letterGrid = document.getElementById('letterGrid');
       const timerEl = document.getElementById('timer');
       const topicDisplay = document.getElementById('topicDisplay');
       const topicSelect = document.getElementById('topicSelect');
       const timerSelect = document.getElementById('timerSelect');
+      const menuSizeButton = document.getElementById('menuSizeButton');
+
+      const menuSizes = ['16px', '20px', '24px'];
+      let menuSizeStep = 0;
+
+      function toggleMenuSize() {
+        menuSizeStep = (menuSizeStep + 1) % menuSizes.length;
+        const newSize = menuSizes[menuSizeStep];
+        document.documentElement.style.setProperty('--menu-size', newSize);
+        menuSizeButton.textContent = `Menu Text Size: ${newSize}`;
+      }
 
       TOPICS.forEach(t => {
         const opt = document.createElement('option');
@@ -130,7 +142,6 @@
           div.textContent = letter;
           div.className = 'letter';
           div.onclick = () => onLetterClick(letter, div);
-          div.style.fontSize = (24 * letterScale) + 'px';
           letterGrid.appendChild(div);
         });
       }
@@ -184,23 +195,6 @@
             timerEl.textContent = '⏰ Time\'s up!';
           }
         }, 100);
-      }
-
-      function toggleContrast() {
-        document.body.classList.toggle('high-contrast');
-      }
-
-      function increaseMenuSize() {
-        menuScale += 0.1;
-        document.querySelectorAll('select, button').forEach(el => {
-          el.style.fontSize = (18 * menuScale) + 'px';
-          el.style.padding = (12 * menuScale) + 'px ' + (18 * menuScale) + 'px';
-        });
-      }
-
-      function increaseLetterSize() {
-        letterScale += 0.1;
-        buildGrid();
       }
 
       buildGrid();
