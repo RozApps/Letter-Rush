@@ -1,205 +1,211 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <base target="_top">
-  <title>Letter Rush</title>
-  <style>
-    :root {
-      --font-scale: 1;
-      --bg-color: #f9fafb;
-      --text-color: #000;
-    }
-
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      text-align: center;
-      background: var(--bg-color);
-      color: var(--text-color);
-      font-size: calc(16px * var(--font-scale));
-    }
-
-    h1 { font-size: 1.5em; margin-bottom: 10px; }
-
-    select, button {
-      padding: 8px 14px;
-      margin: 5px;
-      font-size: 1em;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(7, 50px);
-      gap: 8px;
-      justify-content: center;
-      margin: 20px auto;
-    }
-
-    .letter {
-      padding: 10px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      font-size: 1em;
-      font-weight: bold;
-      background: white;
-      cursor: pointer;
-    }
-
-    .letter.used {
-      background: #e2e8f0;
-      color: #999;
-      border-color: #ddd;
-      text-decoration: line-through;
-      cursor: not-allowed;
-    }
-
-    #timer {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-
-    .toggle-buttons {
-      margin-top: 10px;
-    }
-  </style>
-</head>
-<body>
-  <h1>Letter Rush</h1>
-
-  <div>
-    <select id="topicSelect">
-      <option value="">Choose a topic</option>
-    </select>
-    <select id="timerSelect">
-      <option value="10000">10 seconds</option>
-      <option value="15000" selected>15 seconds</option>
-      <option value="20000">20 seconds</option>
-      <option value="30000">30 seconds</option>
-    </select>
-    <button onclick="randomTopic()">🎲 Random Topic</button>
-    <button onclick="startRound()">▶️ Start</button>
-    <button onclick="resetLetters()">🔄 Reset</button>
-  </div>
-
-  <div id="topicDisplay" style="margin-top: 10px; font-weight: bold;"></div>
-  <div id="timer">Timer: 15.0s</div>
-
-  <div class="grid" id="letterGrid"></div>
-
-  <div class="toggle-buttons">
-    <button onclick="toggleContrast()">🔳 Contrast</button>
-    <button onclick="toggleFontSize()">🔠 Font Size: <span id="fontSizeLabel">Medium</span></button>
-  </div>
-
-  <script>
-    const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const TOPICS = [
-      'Animals', 'Countries', 'Fruits', 'Cities', 'Colors', 'Sports', 'Vehicles',
-      'Occupations', 'Things in a kitchen', 'Movies', 'TV Shows', 'Cartoons',
-      'Superheroes', 'Foods', 'Desserts', 'Body parts', 'School subjects', 'Toys',
-      'Games', 'Stores', 'Restaurants', 'Holidays', 'Tools', 'Weather', 'Emotions'
-    ];
-
-    const letterGrid = document.getElementById('letterGrid');
-    const timerEl = document.getElementById('timer');
-    const topicDisplay = document.getElementById('topicDisplay');
-    const topicSelect = document.getElementById('topicSelect');
-    const timerSelect = document.getElementById('timerSelect');
-    const fontSizeLabel = document.getElementById('fontSizeLabel');
-
-    let used = new Set();
-    let running = false;
-    let timer = null;
-    let remaining = 15000;
-
-    const fontSizes = ['Small', 'Medium', 'Large'];
-    const fontScales = [0.9, 1, 1.2];
-    let fontIndex = 1;
-
-    function buildGrid() {
-      letterGrid.innerHTML = '';
-      LETTERS.forEach(letter => {
-        const div = document.createElement('div');
-        div.textContent = letter;
-        div.className = 'letter';
-        div.onclick = () => onLetterClick(letter, div);
-        letterGrid.appendChild(div);
-      });
-    }
-
-    function onLetterClick(letter, div) {
-      if (!running || used.has(letter)) return;
-      used.add(letter);
-      div.classList.add('used');
-      resetTimer();
-    }
-
-    function resetLetters() {
-      used.clear();
-      running = false;
-      clearInterval(timer);
-      remaining = parseInt(timerSelect.value);
-      timerEl.textContent = 'Timer: ' + (remaining / 1000).toFixed(1) + 's';
-      buildGrid();
-      topicDisplay.textContent = '';
-    }
-
-    function randomTopic() {
-      const pick = TOPICS[Math.floor(Math.random() * TOPICS.length)];
-      topicSelect.value = pick;
-      topicDisplay.textContent = 'Topic: ' + pick;
-    }
-
-    function startRound() {
-      if (!topicSelect.value) {
-        alert('Please choose a topic first.');
-        return;
+  <head>
+    <base target="_top">
+    <title>Letter Rush</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        text-align: center;
+        background: #f9fafb;
+        color: #111;
+        transition: all 0.3s ease;
       }
-      topicDisplay.textContent = 'Topic: ' + topicSelect.value;
-      used.clear();
-      running = true;
-      remaining = parseInt(timerSelect.value);
-      buildGrid();
-      resetTimer();
-    }
+      body.dark-mode {
+        background: #111;
+        color: #eee;
+      }
+      h1 { font-size: 28px; margin-bottom: 10px; }
+      select, button, label {
+        padding: 8px 14px;
+        margin: 5px;
+        font-size: 18px;
+      }
+      .controls { margin-top: 10px; }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(7, 60px);
+        gap: 10px;
+        justify-content: center;
+        margin: 20px auto;
+      }
+      .letter {
+        padding: 10px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        font-weight: bold;
+        background: white;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.2s;
+        font-size: 1.5em;
+      }
+      .letter.used {
+        background: #e2e8f0;
+        color: #999;
+        border-color: #ddd;
+        text-decoration: line-through;
+        cursor: not-allowed;
+      }
+      body.dark-mode .letter {
+        background: #333;
+        color: #fff;
+        border-color: #666;
+      }
+      body.dark-mode .letter.used {
+        background: #555;
+        color: #aaa;
+      }
+      #timer { font-size: 20px; margin-top: 10px; font-weight: bold; }
+      .sliders {
+        margin: 15px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Letter Rush</h1>
 
-    function resetTimer() {
-      clearInterval(timer);
-      remaining = parseInt(timerSelect.value);
-      timerEl.textContent = 'Timer: ' + (remaining / 1000).toFixed(1) + 's';
-      timer = setInterval(() => {
-        remaining -= 100;
+    <div class="controls">
+      <select id="topicSelect">
+        <option value="">Choose a topic</option>
+      </select>
+      <select id="timerSelect">
+        <option value="10000">10 seconds</option>
+        <option value="15000" selected>15 seconds</option>
+        <option value="20000">20 seconds</option>
+        <option value="30000">30 seconds</option>
+      </select>
+      <button onclick="randomTopic()">🎲 Random Topic</button>
+      <button onclick="startRound()">▶️ Start</button>
+      <button onclick="resetLetters()">🔄 Reset</button>
+    </div>
+
+    <div class="sliders">
+      <label>🅰️ Font Size: 
+        <button onclick="toggleFontSize()">Toggle Size</button>
+      </label>
+      <br>
+      <label>🔠 Letter Size: 
+        <input type="range" id="letterSizeSlider" min="1" max="5" step="0.1" value="1.5" onchange="updateLetterSize()">
+      </label>
+      <br>
+      <label>🌓 Contrast:
+        <button onclick="toggleContrast()">Toggle Dark Mode</button>
+      </label>
+    </div>
+
+    <div id="topicDisplay" style="margin-top: 10px; font-weight: bold;"></div>
+    <div id="timer">Timer: 15.0s</div>
+    <div class="grid" id="letterGrid"></div>
+
+    <script>
+      const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+      const TOPICS = [
+        'Animals','Countries','Fruits','Cities','Colors','Sports','Vehicles',
+        'Occupations','Things in a kitchen','Movies','TV Shows','Cartoons',
+        'Superheroes','Foods','Desserts','Body parts','School subjects','Toys',
+        'Games','Stores','Restaurants','Holidays','Tools','Weather','Emotions'
+      ];
+      let used = new Set();
+      let running = false;
+      let timer = null;
+      let remaining = 15000;
+
+      const letterGrid = document.getElementById('letterGrid');
+      const timerEl = document.getElementById('timer');
+      const topicDisplay = document.getElementById('topicDisplay');
+      const topicSelect = document.getElementById('topicSelect');
+      const timerSelect = document.getElementById('timerSelect');
+      const letterSizeSlider = document.getElementById('letterSizeSlider');
+
+      TOPICS.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t;
+        topicSelect.appendChild(opt);
+      });
+
+      function buildGrid() {
+        letterGrid.innerHTML = '';
+        LETTERS.forEach(letter => {
+          const div = document.createElement('div');
+          div.textContent = letter;
+          div.className = 'letter';
+          div.onclick = () => onLetterClick(letter, div);
+          letterGrid.appendChild(div);
+        });
+        updateLetterSize(); // Reapply size on rebuild
+      }
+
+      function onLetterClick(letter, div) {
+        if (!running || used.has(letter)) return;
+        used.add(letter);
+        div.classList.add('used');
+        resetTimer();
+      }
+
+      function resetLetters() {
+        used.clear();
+        running = false;
+        clearInterval(timer);
+        remaining = parseInt(timerSelect.value);
         timerEl.textContent = 'Timer: ' + (remaining / 1000).toFixed(1) + 's';
-        if (remaining <= 0) {
-          clearInterval(timer);
-          running = false;
-          timerEl.textContent = '⏰ Time\'s up!';
+        buildGrid();
+        topicDisplay.textContent = '';
+      }
+
+      function randomTopic() {
+        const pick = TOPICS[Math.floor(Math.random() * TOPICS.length)];
+        topicSelect.value = pick;
+        topicDisplay.textContent = 'Topic: ' + pick;
+      }
+
+      function startRound() {
+        if (!topicSelect.value) {
+          alert('Please choose a topic first.');
+          return;
         }
-      }, 100);
-    }
+        topicDisplay.textContent = 'Topic: ' + topicSelect.value;
+        used.clear();
+        running = true;
+        remaining = parseInt(timerSelect.value);
+        buildGrid();
+        resetTimer();
+      }
 
-    function toggleContrast() {
-      const root = document.documentElement;
-      const currentBg = getComputedStyle(root).getPropertyValue('--bg-color').trim();
-      const isLight = currentBg === '#f9fafb';
-      root.style.setProperty('--bg-color', isLight ? '#000' : '#f9fafb');
-      root.style.setProperty('--text-color', isLight ? '#fff' : '#000');
-    }
+      function resetTimer() {
+        clearInterval(timer);
+        remaining = parseInt(timerSelect.value);
+        timerEl.textContent = 'Timer: ' + (remaining / 1000).toFixed(1) + 's';
+        timer = setInterval(() => {
+          remaining -= 100;
+          timerEl.textContent = 'Timer: ' + (remaining / 1000).toFixed(1) + 's';
+          if (remaining <= 0) {
+            clearInterval(timer);
+            running = false;
+            timerEl.textContent = '⏰ Time\'s up!';
+          }
+        }, 100);
+      }
 
-    function toggleFontSize() {
-      fontIndex = (fontIndex + 1) % fontSizes.length;
-      document.documentElement.style.setProperty('--font-scale', fontScales[fontIndex]);
-      fontSizeLabel.textContent = fontSizes[fontIndex];
-    }
+      function toggleContrast() {
+        document.body.classList.toggle('dark-mode');
+      }
 
-    TOPICS.forEach(t => {
-      const opt = document.createElement('option');
-      opt.value = t;
-      opt.textContent = t;
-      topicSelect.appendChild(opt);
-    });
+      let fontLarge = false;
+      function toggleFontSize() {
+        fontLarge = !fontLarge;
+        document.body.style.fontSize = fontLarge ? '22px' : '16px';
+      }
 
-    buildGrid();
-  </script>
-</body>
+      function updateLetterSize() {
+        const size = letterSizeSlider.value;
+        document.querySelectorAll('.letter').forEach(el => {
+          el.style.fontSize = size + 'em';
+        });
+      }
+
+      buildGrid();
+    </script>
+  </body>
 </html>
