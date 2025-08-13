@@ -5,7 +5,7 @@
     <title>Letter Rush</title>
     <style>
       :root {
-        --menu-size: 16px;
+        --menu-size: 18px;
         --bg-color: #f9fafb;
         --letter-bg: white;
         --letter-border: #ccc;
@@ -30,9 +30,10 @@
       }
 
       select, button {
-        padding: 10px 16px;
+        padding: 12px 18px;
         margin: 8px;
         font-size: var(--menu-size);
+        min-height: 44px;
       }
 
       .grid {
@@ -45,14 +46,18 @@
       }
 
       .letter {
-        padding: 14px;
+        padding: 18px;
         border: 2px solid var(--letter-border);
         border-radius: 8px;
-        font-size: var(--letter-size, 24px);
+        font-size: var(--letter-size, 32px);
         font-weight: bold;
         background: var(--letter-bg);
         color: var(--letter-text-color);
         cursor: pointer;
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
 
       .letter.used {
@@ -64,7 +69,7 @@
       }
 
       #timer {
-        font-size: 20px;
+        font-size: 24px;
         margin-top: 10px;
         font-weight: bold;
       }
@@ -95,8 +100,8 @@
         <option value="30000">30 seconds</option>
       </select>
 
-      <button onclick="toggleMenuSize()" id="menuSizeButton">Menu Text Size: 16px</button>
-      <button onclick="toggleLetterSize()" id="letterSizeButton">Letter Size: 24px</button>
+      <button onclick="toggleMenuSize()" id="menuSizeButton">Menu Text Size: 18px</button>
+      <button onclick="toggleLetterSize()" id="letterSizeButton">Letter Size: 32px</button>
       <button onclick="toggleContrast()" id="contrastButton">🔆 Normal Contrast</button>
     </div>
 
