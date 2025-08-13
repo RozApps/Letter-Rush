@@ -9,28 +9,32 @@
         padding: 20px;
         text-align: center;
         background: #f9fafb;
-        color: #111;
-        transition: all 0.3s ease;
+        transition: font-size 0.2s;
+        font-size: 16px;
       }
-      body.dark-mode {
-        background: #111;
-        color: #eee;
+      h1 {
+        font-size: 1.8em;
+        margin-bottom: 10px;
       }
-      h1 { font-size: 28px; margin-bottom: 10px; }
       select, button, label {
-        padding: 8px 14px;
+        padding: 8px 12px;
         margin: 5px;
-        font-size: 18px;
+        font-size: 1em;
       }
-      .controls { margin-top: 10px; }
       .grid {
         display: grid;
-        grid-template-columns: repeat(7, 60px);
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
         gap: 10px;
         justify-content: center;
         margin: 20px auto;
+        max-width: 500px;
       }
       .letter {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        aspect-ratio: 1;
         padding: 10px;
         border: 2px solid #ccc;
         border-radius: 8px;
@@ -39,6 +43,8 @@
         cursor: pointer;
         transition: background 0.2s, transform 0.2s;
         font-size: 1.5em;
+        overflow: hidden;
+        word-break: break-word;
       }
       .letter.used {
         background: #e2e8f0;
@@ -47,25 +53,20 @@
         text-decoration: line-through;
         cursor: not-allowed;
       }
-      body.dark-mode .letter {
-        background: #333;
-        color: #fff;
-        border-color: #666;
+      #timer {
+        font-size: 1.2em;
+        margin-top: 10px;
+        font-weight: bold;
       }
-      body.dark-mode .letter.used {
-        background: #555;
-        color: #aaa;
-      }
-      #timer { font-size: 20px; margin-top: 10px; font-weight: bold; }
-      .sliders {
-        margin: 15px 0;
+      #letterSizeSlider {
+        width: 150px;
+        vertical-align: middle;
       }
     </style>
   </head>
   <body>
     <h1>Letter Rush</h1>
-
-    <div class="controls">
+    <div>
       <select id="topicSelect">
         <option value="">Choose a topic</option>
       </select>
@@ -80,18 +81,10 @@
       <button onclick="resetLetters()">🔄 Reset</button>
     </div>
 
-    <div class="sliders">
-      <label>🅰️ Font Size: 
-        <button onclick="toggleFontSize()">Toggle Size</button>
-      </label>
-      <br>
-      <label>🔠 Letter Size: 
-        <input type="range" id="letterSizeSlider" min="1" max="5" step="0.1" value="1.5" onchange="updateLetterSize()">
-      </label>
-      <br>
-      <label>🌓 Contrast:
-        <button onclick="toggleContrast()">Toggle Dark Mode</button>
-      </label>
+    <div style="margin-top: 10px;">
+      <label for="letterSizeSlider">🔠 Letter Size</label>
+      <input id="letterSizeSlider" type="range" min="1" max="5" step="0.1" value="1.5" onchange="updateLetterSize()" />
+      <button onclick="toggleFontSize()">📝 Font Size</button>
     </div>
 
     <div id="topicDisplay" style="margin-top: 10px; font-weight: bold;"></div>
@@ -106,17 +99,20 @@
         'Superheroes','Foods','Desserts','Body parts','School subjects','Toys',
         'Games','Stores','Restaurants','Holidays','Tools','Weather','Emotions'
       ];
+
       let used = new Set();
       let running = false;
       let timer = null;
       let remaining = 15000;
+      let fontSizes = ['14px', '16px', '20px'];
+      let fontSizeIndex = 1;
 
       const letterGrid = document.getElementById('letterGrid');
       const timerEl = document.getElementById('timer');
       const topicDisplay = document.getElementById('topicDisplay');
       const topicSelect = document.getElementById('topicSelect');
       const timerSelect = document.getElementById('timerSelect');
-      const letterSizeSlider = document.getElementById('letterSizeSlider');
+      const slider = document.getElementById('letterSizeSlider');
 
       TOPICS.forEach(t => {
         const opt = document.createElement('option');
@@ -131,10 +127,10 @@
           const div = document.createElement('div');
           div.textContent = letter;
           div.className = 'letter';
+          div.style.fontSize = `${slider.value}em`;
           div.onclick = () => onLetterClick(letter, div);
           letterGrid.appendChild(div);
         });
-        updateLetterSize(); // Reapply size on rebuild
       }
 
       function onLetterClick(letter, div) {
@@ -188,21 +184,15 @@
         }, 100);
       }
 
-      function toggleContrast() {
-        document.body.classList.toggle('dark-mode');
-      }
-
-      let fontLarge = false;
-      function toggleFontSize() {
-        fontLarge = !fontLarge;
-        document.body.style.fontSize = fontLarge ? '22px' : '16px';
-      }
-
       function updateLetterSize() {
-        const size = letterSizeSlider.value;
         document.querySelectorAll('.letter').forEach(el => {
-          el.style.fontSize = size + 'em';
+          el.style.fontSize = `${slider.value}em`;
         });
+      }
+
+      function toggleFontSize() {
+        fontSizeIndex = (fontSizeIndex + 1) % fontSizes.length;
+        document.body.style.fontSize = fontSizes[fontSizeIndex];
       }
 
       buildGrid();
